@@ -11,20 +11,25 @@ export default function Lobby() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const ctrl = new AbortController();
     async function fetchBlocks() {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_BASE}/api/codeblocks`
+          `${import.meta.env.VITE_API_BASE}/api/codeblocks`,
+          { signal: ctrl.signal }
         );
         setBlocks(res.data);
       } catch (err) {
-        setError("Failed to load code blocks. Please try again later.");
-        console.error(err);
+        if (err.name !== "CanceledError" && err.name !== "AbortError") {
+          setError("Failed to load code blocks. Please try again later.");
+          console.error(err);
+        }
       } finally {
         setLoading(false);
       }
     }
     fetchBlocks();
+    return () => ctrl.abort();
   }, []);
 
   // Determine subtitle text based on the state
