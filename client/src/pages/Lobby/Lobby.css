@@ -74,8 +74,9 @@
 .card:hover,
 .card:focus-visible {
   transform: translateY(-3px);
-  border-color: rgba(124, 58, 237, 0.45);
+  border-color: rgba(143, 143, 144, 0.45);
   box-shadow: 0 10px 28px rgba(147, 124, 129, 0.25);
+  outline: none;
 }
 
 .card__badge {
