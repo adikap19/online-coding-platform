@@ -1,0 +1,9 @@
+.lobby-container {
+  max-width: 720px;
+  margin: 40px auto;
+  font-family: sans-serif;
+}
+
+.lobby-container h1 {
+  margin-bottom: 20px;
+}

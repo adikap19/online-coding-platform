@@ -1,0 +1,23 @@
+# OS / misc
+.DS_Store
+Thumbs.db
+*.log
+
+# Node
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build outputs
+dist/
+client/dist/
+server/dist/
+
+# Env files (never commit secrets)
+.env
+.env.*
+client/.env
+server/.env
+
+# Editors
+.vscode/
