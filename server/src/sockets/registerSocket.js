@@ -64,9 +64,8 @@ export function registerSocket(io) {
         const correctSolution = normalize(block?.solution);
 
         if (block && studentCode === correctSolution) {
-          console.log(">>> EMIT solved to", blockId, "from", socket.id);
-          socket.emit("solved"); // send to the sender
-          socket.to(blockId).emit("solved"); // send to all others in room
+          socket.emit("solved");
+          socket.to(blockId).emit("solved");
         }
       } catch (e) {
         console.error("Error in code-change handler:", e);

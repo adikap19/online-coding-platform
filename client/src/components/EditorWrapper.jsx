@@ -1,11 +1,7 @@
 import Editor from "@monaco-editor/react";
+import { handleEditorWillMount } from "../utils/editorConfig";
 
-export default function EditorWrapper({
-  code,
-  onChange,
-  role,
-  handleEditorWillMount,
-}) {
+export default function EditorWrapper({ code, onChange, role }) {
   return (
     <div className="cb__editorWrap">
       <Editor

@@ -1,20 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import Editor from "@monaco-editor/react";
 import "./CodeBlock.css";
 
-const handleEditorWillMount = (monaco) => {
-  // Keep syntax highlighting; show only basic syntax errors
-  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-    noSemanticValidation: true, 
-    noSyntaxValidation: false, 
-  });
-  monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-    allowNonTsExtensions: true,
-    checkJs: false,
-  });
-};
+import LoadingState from "../../components/LoadingState";
+import ErrorState from "../../components/ErrorState";
+import RoomHeader from "../../components/RoomHeader";
+import EditorWrapper from "../../components/EditorWrapper";
 
 export default function CodeBlock() {
   const { id } = useParams();
@@ -36,6 +28,10 @@ export default function CodeBlock() {
       });
     }
     const socket = socketRef.current;
+
+    if (!socketRef.current?.connected) {
+      socketRef.current.connect();
+    }
 
     socket.emit("join-room", { blockId: id });
 
@@ -80,6 +76,7 @@ export default function CodeBlock() {
       socket.off("mentor-left", onMentorLeft);
       socket.off("solved", onSolved);
       socket.off("error", onError);
+      socket.disconnect();
     };
   }, [id, navigate]);
 
@@ -90,71 +87,21 @@ export default function CodeBlock() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="cb cb--center">
-        <div className="spinner" aria-label="Loading" />
-        <p className="muted">Joining room…</p>
-        <div className="skeleton skeleton--title" />
-        <div className="skeleton skeleton--editor" />
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingState />;
 
-  if (errorMsg) {
-    return (
-      <div className="cb cb--center">
-        <h2 className="cb__title">Unable to join room</h2>
-        <p className="error">{errorMsg}</p>
-        <button className="cb__back" onClick={() => navigate("/")}>
-          Back to Lobby
-        </button>
-      </div>
-    );
-  }
+  if (errorMsg)
+    return <ErrorState message={errorMsg} onBack={() => navigate("/")} />;
 
   return (
     <div className="cb">
-      <div className="cb__header">
-        <h1 className="cb__title">
-          Code Session: <span className="session-title">{title}</span>
-        </h1>
-        {role && (
-          <p className="cb__role">
-            Role:{" "}
-            <strong>{role === "mentor" ? "Mentor (Tom)" : "Student"}</strong>
-          </p>
-        )}
-        <p className="cb__count">
-          👥 {studentsCount} student{studentsCount !== 1 && "s"} in room
-        </p>
-        <button className="cb__back" onClick={() => navigate("/")}>
-          ← Back to Lobby
-        </button>
-      </div>
+      <RoomHeader
+        title={title}
+        role={role}
+        studentsCount={studentsCount}
+        onBack={() => navigate("/")}
+      />
 
-      <div className="cb__editorWrap">
-        <Editor
-          height="60vh"
-          language="javascript"
-          path="script.js"
-          theme="vs-dark"
-          value={code}
-          onChange={handleChange}
-          beforeMount={handleEditorWillMount}
-          options={{
-            readOnly: role === "mentor",
-            minimap: { enabled: false },
-            fontSize: 14,
-            scrollBeyondLastLine: true,
-            padding: { top: 16, bottom: 12 },
-            fixedOverflowWidgets: true,
-            overviewRulerBorder: false,
-            roundedSelection: true,
-            cursorSmoothCaretAnimation: "on",
-          }}
-        />
-      </div>
+      <EditorWrapper code={code} onChange={handleChange} role={role} />
 
       {solved && (
         <div className="cb__solvedOverlay">
