@@ -8,7 +8,7 @@ const seedData = [
   {
     title: "Async case",
     slug: "async-case",
-    initialCode: `// Write an async function fetchData that returns "OK"\nasync function fetchData(){\n  return "OK";\n}\n`,
+    initialCode: `// Write an async function fetchData that returns "OK"\nasync function fetchData(){\n}\n`,
     solution: `async function fetchData(){\n  return "OK";\n}`,
   },
   {
