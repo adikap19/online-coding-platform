@@ -45,20 +45,22 @@ export function registerSocket(io) {
 
     socket.on("code-change", async ({ blockId, code }) => {
       const room = getOrCreateRoom(blockId);
-      if (isMentor(blockId, socket.id)) {
-        return;
-      }
+      if (isMentor(blockId, socket.id)) return;
       room.code = code ?? "";
-
       socket.to(blockId).emit("code-update", { code: room.code });
 
       try {
         const block = await CodeBlock.findById(blockId, { solution: 1 });
-        const clean = (s) => (s || "").replace(/\r\n/g, "\n").trim();
-        if (block && clean(room.code) === clean(block.solution)) {
+        const normalize = (s) =>
+          (s || "")
+            .replace(/\r\n/g, "\n")
+            .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "")
+            .replace(/\s+/g, "") // <-- ignore all whitespace differences
+            .trim();
+        if (block && normalize(room.code) === normalize(block.solution)) {
           io.to(blockId).emit("solved");
         }
-      } catch {}
+      } catch (e) {}
     });
 
     socket.on("leave-room", ({ blockId }) => {

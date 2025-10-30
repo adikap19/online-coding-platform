@@ -14,14 +14,14 @@ const seedData = [
   {
     title: "Array sum",
     slug: "array-sum",
-    initialCode: `// sum([1,2,3]) => 6\nfunction arraySum(arr){\n  // your code\n}\n`,
-    solution: `function arraySum(arr){\n  return arr.reduce((a,b)=>a+b,0);\n}`,
+    initialCode: `// sum([1,2,3]) => 6\nfunction sum(arr){\n  // your code\n}\n`,
+    solution: `function sum(arr){\n  return arr.reduce((a,b)=>a+b,0);\n}`,
   },
   {
     title: "Reverse string",
     slug: "reverse-string",
-    initialCode: `// reverse("abc") => "cba"\nfunction reverseString(s){\n  // your code\n}\n`,
-    solution: `function reverseString(s){\n  return s.split('').reverse().join('');\n}`,
+    initialCode: `// reverse("abc") => "cba"\nfunction reverse(s){\n  // your code\n}\n`,
+    solution: `function reverse(s){\n  return s.split('').reverse().join('');\n}`,
   },
   {
     title: "Is prime",
