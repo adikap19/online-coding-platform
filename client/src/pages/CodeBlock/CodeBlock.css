@@ -6,6 +6,61 @@
   text-align: center;
 }
 
+.cb--center {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+}
+
+.muted {
+  color: var(--muted);
+}
+.error {
+  color: #ff6b6b;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--primary-2);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.08)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 12px;
+}
+.skeleton--title {
+  width: min(520px, 80%);
+  height: 28px;
+}
+.skeleton--editor {
+  width: min(920px, 92%);
+  height: 320px;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .cb__header {
   margin-bottom: 20px;
 }
@@ -37,11 +92,14 @@
   padding: 10px 20px;
   font-weight: 600;
   cursor: pointer;
+  user-select: none;
   transition: transform 0.2s ease;
 }
-
 .cb__back:hover {
   transform: scale(1.05);
+}
+.cb__back:focus {
+  outline: none;
 }
 
 .cb__editorWrap {
@@ -63,7 +121,6 @@
   justify-content: center;
   animation: fadeInOut 3s ease;
 }
-
 @keyframes fadeInOut {
   0% {
     opacity: 0;

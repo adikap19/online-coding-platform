@@ -1,65 +1,105 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Editor from "@monaco-editor/react";
 import "./CodeBlock.css";
 
-const socket = io(import.meta.env.VITE_API_BASE, {
-  transports: ["websocket"],
-});
-
 export default function CodeBlock() {
-  const { id } = useParams();
+  const { id } = useParams(); 
   const navigate = useNavigate();
+  const socketRef = useRef(null);
 
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState(null); 
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
   const [studentsCount, setStudentsCount] = useState(0);
   const [solved, setSolved] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); 
+  const [errorMsg, setErrorMsg] = useState("");
 
-  // conecting to a room
   useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io(import.meta.env.VITE_API_BASE, {
+        transports: ["websocket"],
+      });
+    }
+    const socket = socketRef.current;
+
     socket.emit("join-room", { blockId: id });
 
-    socket.on("role-assigned", (data) => {
+    const onRoleAssigned = (data) => {
       setRole(data.role);
       setTitle(data.title);
       setCode(data.code);
       setStudentsCount(data.studentsCount);
-    });
+      setIsLoading(false);
+    };
 
-    socket.on("code-update", ({ code }) => {
-      setCode(code);
-    });
+    const onCodeUpdate = ({ code }) => setCode(code);
+    const onRoomCount = ({ studentsCount }) => setStudentsCount(studentsCount);
 
-    socket.on("room-count", ({ studentsCount }) => {
-      setStudentsCount(studentsCount);
-    });
-
-    socket.on("mentor-left", () => {
+    const onMentorLeft = () => {
       alert("The mentor has left the session. Returning to lobby...");
       navigate("/");
-    });
+    };
 
-    socket.on("solved", () => {
+    const onSolved = () => {
       setSolved(true);
       setTimeout(() => setSolved(false), 3000);
-    });
+    };
+
+    const onError = ({ message }) => {
+      setErrorMsg(message || "Something went wrong");
+      setIsLoading(false);
+    };
+
+    socket.on("role-assigned", onRoleAssigned);
+    socket.on("code-update", onCodeUpdate);
+    socket.on("room-count", onRoomCount);
+    socket.on("mentor-left", onMentorLeft);
+    socket.on("solved", onSolved);
+    socket.on("error", onError);
 
     return () => {
       socket.emit("leave-room", { blockId: id });
-      socket.off();
+      socket.off("role-assigned", onRoleAssigned);
+      socket.off("code-update", onCodeUpdate);
+      socket.off("room-count", onRoomCount);
+      socket.off("mentor-left", onMentorLeft);
+      socket.off("solved", onSolved);
+      socket.off("error", onError);
     };
   }, [id, navigate]);
 
-  // sendind code changed to sever - if it's student
   const handleChange = (value) => {
-    if (role === "student") {
-      setCode(value);
-      socket.emit("code-change", { blockId: id, code: value });
+    if (role === "student" && socketRef.current) {
+      setCode(value ?? "");
+      socketRef.current.emit("code-change", { blockId: id, code: value ?? "" });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="cb cb--center">
+        <div className="spinner" aria-label="Loading" />
+        <p className="muted">Joining room…</p>
+        <div className="skeleton skeleton--title" />
+        <div className="skeleton skeleton--editor" />
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="cb cb--center">
+        <h2 className="cb__title">Unable to join room</h2>
+        <p className="error">{errorMsg}</p>
+        <button className="cb__back" onClick={() => navigate("/")}>
+          Back to Lobby
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="cb">
@@ -88,6 +128,8 @@ export default function CodeBlock() {
             minimap: { enabled: false },
             fontSize: 14,
             scrollBeyondLastLine: false,
+            roundedSelection: true,
+            cursorSmoothCaretAnimation: "on",
           }}
         />
       </div>
