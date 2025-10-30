@@ -5,16 +5,16 @@ import Editor from "@monaco-editor/react";
 import "./CodeBlock.css";
 
 export default function CodeBlock() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
   const socketRef = useRef(null);
 
-  const [role, setRole] = useState(null); 
+  const [role, setRole] = useState(null);
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
   const [studentsCount, setStudentsCount] = useState(0);
   const [solved, setSolved] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
@@ -104,13 +104,19 @@ export default function CodeBlock() {
   return (
     <div className="cb">
       <div className="cb__header">
-        <h1 className="cb__title">{title}</h1>
+        <h1 className="cb__title">
+          {" "}
+          Code Session: <span className="cb__titleName">{title}</span>
+        </h1>
         {role && (
           <p className="cb__role">
-            You are the <strong>{role}</strong>
+            Role:{" "}
+            <strong>{role === "mentor" ? "Mentor (Tom)" : "Student"}</strong>
           </p>
         )}
-        <p className="cb__count">{studentsCount} student(s) in room</p>
+        <p className="cb__count">
+          👥 {studentsCount} student{studentsCount !== 1 && "s"} in room
+        </p>
         <button className="cb__back" onClick={() => navigate("/")}>
           ← Back to Lobby
         </button>
