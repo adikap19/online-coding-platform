@@ -26,8 +26,8 @@ export default function Lobby() {
     fetchBlocks();
   }, []);
 
-  // Determine subtitle text based on state
-  let subtitle = "Choose a code block to start practicing:";
+  // Determine subtitle text based on the state
+  let subtitle = "Choose a code block to start practicing JS:";
   if (loading) subtitle = "Loading code blocks…";
   if (error) subtitle = error;
 

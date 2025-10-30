@@ -105,8 +105,7 @@ export default function CodeBlock() {
     <div className="cb">
       <div className="cb__header">
         <h1 className="cb__title">
-          {" "}
-          Code Session: <span className="cb__titleName">{title}</span>
+          Code Session: <span className="session-title">{title}</span>
         </h1>
         {role && (
           <p className="cb__role">
