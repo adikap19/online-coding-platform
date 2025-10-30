@@ -46,21 +46,31 @@ export function registerSocket(io) {
     socket.on("code-change", async ({ blockId, code }) => {
       const room = getOrCreateRoom(blockId);
       if (isMentor(blockId, socket.id)) return;
+
       room.code = code ?? "";
       socket.to(blockId).emit("code-update", { code: room.code });
 
       try {
         const block = await CodeBlock.findById(blockId, { solution: 1 });
+
         const normalize = (s) =>
           (s || "")
             .replace(/\r\n/g, "\n")
             .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "")
-            .replace(/\s+/g, "") // <-- ignore all whitespace differences
+            .replace(/\s+/g, "")
             .trim();
-        if (block && normalize(room.code) === normalize(block.solution)) {
-          io.to(blockId).emit("solved");
+
+        const studentCode = normalize(room.code);
+        const correctSolution = normalize(block?.solution);
+
+        if (block && studentCode === correctSolution) {
+          console.log(">>> EMIT solved to", blockId, "from", socket.id);
+          socket.emit("solved"); // send to the sender
+          socket.to(blockId).emit("solved"); // send to all others in room
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Error in code-change handler:", e);
+      }
     });
 
     socket.on("leave-room", ({ blockId }) => {

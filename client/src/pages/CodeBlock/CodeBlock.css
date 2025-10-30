@@ -151,7 +151,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeInOut 3s ease;
+  animation: fadeInOut 15s ease;
 }
 @keyframes fadeInOut {
   0% {
