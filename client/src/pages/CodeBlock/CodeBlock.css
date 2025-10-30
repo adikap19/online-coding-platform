@@ -75,13 +75,6 @@
   color: transparent;
 }
 
-.cb__titleName {
-  background: linear-gradient(90deg, var(--accent), var(--primary-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 .cb__role {
   font-size: 18px;
   margin-bottom: 4px;
@@ -126,11 +119,27 @@
 }
 
 .cb__editorWrap {
-  max-width: 900px;
-  margin: 0 auto;
+  max-width: 1000px;
+  margin: 16px auto 0;
   border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  background: #0b1220; /* subtle surface behind the editor */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  overflow: visible; /* allow editor widgets (hovers) to overflow nicely */
+}
+
+.cb__editorWrap .monaco-editor,
+.cb__editorWrap .monaco-editor .overflow-guard,
+.cb__editorWrap .monaco-scrollable-element,
+.cb__editorWrap .margin {
+  border-radius: 12px;
+}
+.cb__editorWrap .decorationsOverviewRuler {
+  right: 4px !important;
+}
+.monaco-editor .monaco-hover,
+.monaco-editor .hover-widget {
+  z-index: 60;
 }
 
 .cb__solvedOverlay {

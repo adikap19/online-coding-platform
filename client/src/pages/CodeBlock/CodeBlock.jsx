@@ -4,6 +4,18 @@ import { io } from "socket.io-client";
 import Editor from "@monaco-editor/react";
 import "./CodeBlock.css";
 
+const handleEditorWillMount = (monaco) => {
+  // Keep syntax highlighting; show only basic syntax errors
+  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+    noSemanticValidation: true, 
+    noSyntaxValidation: false, 
+  });
+  monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+    allowNonTsExtensions: true,
+    checkJs: false,
+  });
+};
+
 export default function CodeBlock() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -123,16 +135,21 @@ export default function CodeBlock() {
 
       <div className="cb__editorWrap">
         <Editor
-          height="70vh"
-          defaultLanguage="javascript"
+          height="60vh"
+          language="javascript"
+          path="script.js"
           theme="vs-dark"
           value={code}
           onChange={handleChange}
+          beforeMount={handleEditorWillMount}
           options={{
             readOnly: role === "mentor",
             minimap: { enabled: false },
             fontSize: 14,
-            scrollBeyondLastLine: false,
+            scrollBeyondLastLine: true,
+            padding: { top: 16, bottom: 12 },
+            fixedOverflowWidgets: true,
+            overviewRulerBorder: false,
             roundedSelection: true,
             cursorSmoothCaretAnimation: "on",
           }}
