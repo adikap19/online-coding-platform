@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Lobby.css";
+import { Link } from "react-router-dom";
 
 export default function Lobby() {
   const navigate = useNavigate();
@@ -44,15 +45,16 @@ export default function Lobby() {
           <h2 className="section__title">Choose Code Block</h2>
           <div className="grid">
             {blocks.map((block) => (
-              <div
+              <Link
                 key={block._id}
+                to={`/block/${block._id}`}
                 className="card"
-                onClick={() => navigate(`/block/${block._id}`)}
+                aria-label={`Open code block: ${block.title}`}
               >
                 <div className="card__badge">JS</div>
                 <h3 className="card__title">{block.title}</h3>
                 <p className="card__hint">Click to enter this code challenge</p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
