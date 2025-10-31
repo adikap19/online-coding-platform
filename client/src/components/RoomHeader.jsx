@@ -8,6 +8,11 @@ export default function RoomHeader({ title, role, studentsCount, onBack }) {
         <p className="cb__role">
           Role:{" "}
           <strong>{role === "mentor" ? "Mentor (Tom)" : "Student"}</strong>
+          {role === "mentor" && (
+            <p className="cb__readonly-note">
+              <span>(read-only)</span>
+            </p>
+          )}
         </p>
       )}
       <p className="cb__count">

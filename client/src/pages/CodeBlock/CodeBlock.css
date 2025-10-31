@@ -178,3 +178,11 @@
   color: transparent;
   margin-bottom: 10px;
 }
+
+.cb__readonly-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-left: 6px;
+  opacity: 0.8;
+  font-weight: 600;
+}
