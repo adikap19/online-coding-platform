@@ -8,7 +8,7 @@ const seedData = [
   {
     title: "Async case",
     slug: "async-case",
-    initialCode: `// Write an async function fetchData that returns "OK"\nasync function fetchData(){\n}\n`,
+    initialCode: `// Write an async function fetchData that returns "OK"\nasync function fetchData(){\n  // your code\n}\n`,
     solution: `async function fetchData(){\n  return "OK";\n}`,
   },
   {
@@ -33,12 +33,9 @@ const seedData = [
 
 (async function seed() {
   await connectDB(process.env.MONGODB_URI);
-  const count = await CodeBlock.countDocuments();
-  if (count === 0) {
-    await CodeBlock.insertMany(seedData);
-    console.log("Seeded 4 code blocks");
-  } else {
-    console.log(`Skipped seeding (found ${count})`);
-  }
+
+  await CodeBlock.deleteMany({});
+  await CodeBlock.insertMany(seedData);
+
   process.exit(0);
 })();
