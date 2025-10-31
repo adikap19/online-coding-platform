@@ -19,7 +19,9 @@ export function registerSocket(io) {
         let role;
         if (!room.mentorId) {
           room.mentorId = socket.id;
-          room.code = block.initialCode || "";
+          if (room.code == null || room.code === "") {
+            room.code = block.initialCode || "";
+          }
           role = "mentor";
         } else {
           room.students.add(socket.id);
