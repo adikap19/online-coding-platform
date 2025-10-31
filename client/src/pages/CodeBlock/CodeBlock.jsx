@@ -8,6 +8,84 @@ import ErrorState from "../../components/ErrorState";
 import RoomHeader from "../../components/RoomHeader";
 import EditorWrapper from "../../components/EditorWrapper";
 
+// Ensure socket instance exists and connected.
+function ensureSocket(socketRef) {
+  if (!socketRef.current) {
+    socketRef.current = io(import.meta.env.VITE_API_BASE, {
+      transports: ["websocket"],
+    });
+  }
+  if (socketRef.current.disconnected) {
+    socketRef.current.connect();
+  }
+  return socketRef.current;
+}
+
+// Emit the initial join event for a given room id
+function joinRoom(socket, blockId) {
+  socket.emit("join-room", { blockId });
+}
+
+//  Register all socket event handlers.
+// Returns a cleanup function that removes listeners, emits leave, and disconnects.
+function registerSocketHandlers(socket, blockId, navigate, setters) {
+  const {
+    setRole,
+    setTitle,
+    setCode,
+    setStudentsCount,
+    setSolved,
+    setIsLoading,
+    setErrorMsg,
+  } = setters;
+
+  const onRoleAssigned = (data) => {
+    setRole(data.role);
+    setTitle(data.title);
+    setCode(data.code);
+    setStudentsCount(data.studentsCount);
+    setIsLoading(false);
+  };
+
+  const onCodeUpdate = ({ code }) => setCode(code);
+  const onRoomCount = ({ studentsCount }) => setStudentsCount(studentsCount);
+
+  const onMentorLeft = () => {
+    alert("The mentor has left the session. Returning to lobby...");
+    navigate("/");
+  };
+
+  const onSolved = () => {
+    setSolved(true);
+    setTimeout(() => setSolved(false), 3000);
+  };
+
+  const onError = ({ message }) => {
+    setErrorMsg(message || "Something went wrong");
+    setIsLoading(false);
+  };
+
+  // attach
+  socket.on("role-assigned", onRoleAssigned);
+  socket.on("code-update", onCodeUpdate);
+  socket.on("room-count", onRoomCount);
+  socket.on("mentor-left", onMentorLeft);
+  socket.on("solved", onSolved);
+  socket.on("error", onError);
+
+  return () => {
+    socket.emit("leave-room", { blockId });
+    socket.off("role-assigned", onRoleAssigned);
+    socket.off("code-update", onCodeUpdate);
+    socket.off("room-count", onRoomCount);
+    socket.off("mentor-left", onMentorLeft);
+    socket.off("solved", onSolved);
+    socket.off("error", onError);
+
+    socket.disconnect();
+  };
+}
+
 export default function CodeBlock() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -22,62 +100,21 @@ export default function CodeBlock() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io(import.meta.env.VITE_API_BASE, {
-        transports: ["websocket"],
-      });
-    }
-    const socket = socketRef.current;
+    const socket = ensureSocket(socketRef);
 
-    if (!socketRef.current?.connected) {
-      socketRef.current.connect();
-    }
+    joinRoom(socket, id);
 
-    socket.emit("join-room", { blockId: id });
+    const cleanup = registerSocketHandlers(socket, id, navigate, {
+      setRole,
+      setTitle,
+      setCode,
+      setStudentsCount,
+      setSolved,
+      setIsLoading,
+      setErrorMsg,
+    });
 
-    const onRoleAssigned = (data) => {
-      setRole(data.role);
-      setTitle(data.title);
-      setCode(data.code);
-      setStudentsCount(data.studentsCount);
-      setIsLoading(false);
-    };
-
-    const onCodeUpdate = ({ code }) => setCode(code);
-    const onRoomCount = ({ studentsCount }) => setStudentsCount(studentsCount);
-
-    const onMentorLeft = () => {
-      alert("The mentor has left the session. Returning to lobby...");
-      navigate("/");
-    };
-
-    const onSolved = () => {
-      setSolved(true);
-      setTimeout(() => setSolved(false), 3000);
-    };
-
-    const onError = ({ message }) => {
-      setErrorMsg(message || "Something went wrong");
-      setIsLoading(false);
-    };
-
-    socket.on("role-assigned", onRoleAssigned);
-    socket.on("code-update", onCodeUpdate);
-    socket.on("room-count", onRoomCount);
-    socket.on("mentor-left", onMentorLeft);
-    socket.on("solved", onSolved);
-    socket.on("error", onError);
-
-    return () => {
-      socket.emit("leave-room", { blockId: id });
-      socket.off("role-assigned", onRoleAssigned);
-      socket.off("code-update", onCodeUpdate);
-      socket.off("room-count", onRoomCount);
-      socket.off("mentor-left", onMentorLeft);
-      socket.off("solved", onSolved);
-      socket.off("error", onError);
-      socket.disconnect();
-    };
+    return cleanup;
   }, [id, navigate]);
 
   const handleChange = (value) => {
@@ -88,7 +125,6 @@ export default function CodeBlock() {
   };
 
   if (isLoading) return <LoadingState />;
-
   if (errorMsg)
     return <ErrorState message={errorMsg} onBack={() => navigate("/")} />;
 
