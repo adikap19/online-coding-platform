@@ -9,8 +9,8 @@ const seedData = [
   {
     title: "Async case",
     slug: "async-case",
-    initialCode: `// Write an async function fetchData that returns "OK"\nasync function fetchData(){\n  // your code\n}\n`,
-    solution: `async function fetchData(){\n  return "OK";\n}`,
+    initialCode: `// Write an async function waitAndDouble that takes a number n.\n// It should wait 1 second, then return n * 2.\n// Example: await waitAndDouble(5) ➞ 10\nasync function waitAndDouble(n){\n  // your code\n}\n`,
+    solution: `async function waitAndDouble(n){\n  return new Promise(resolve => setTimeout(() => resolve(n * 2), 1000));\n}`,
   },
   {
     title: "Array sum",
