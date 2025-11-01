@@ -6,91 +6,97 @@ import {
   isMentor,
 } from "../services/roomState.js";
 
-export function registerSocket(io) {
-  io.on("connection", (socket) => {
-    socket.on("join-room", async ({ blockId }) => {
-      try {
-        const block = await CodeBlock.findById(blockId);
-        if (!block) return socket.emit("error", { message: "Room not found" });
+//check whether the current mentor socket is still connected
+function isMentorAlive(io, room) {
+  return !!(room.mentorId && io.sockets.sockets.get(room.mentorId));
+}
 
-        const room = getOrCreateRoom(blockId);
+// normalize code so we can compare student code with solution
+function normalizeCode(s) {
+  return (s || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "")
+    .replace(/\s+/g, "")
+    .trim();
+}
 
-        const mentorAlive = !!(
-          room.mentorId && io.sockets.sockets.get(room.mentorId)
-        );
-        const isSameSocketMentor = room.mentorId === socket.id;
+async function handleJoinRoom(io, socket, { blockId }) {
+  try {
+    const block = await CodeBlock.findById(blockId);
 
-        // If there is no mentor, the first one enters the room is the mentor
-        let role;
-        if (!mentorAlive || isSameSocketMentor || !room.mentorId) {
-          room.mentorId = socket.id;
-          if (room.code == null || room.code === "") {
-            room.code = block.initialCode || "";
-          }
-          role = "mentor";
-        } else {
-          room.students.add(socket.id);
-          role = "student";
-        }
+    if (!block) {
+      socket.emit("error", { message: "Room not found" });
+      return;
+    }
+    const room = getOrCreateRoom(blockId);
+    const mentorAlive = isMentorAlive(io, room);
+    const isSameSocketMentor = room.mentorId === socket.id;
 
-        socket.join(blockId);
+    let role;
+    if (!mentorAlive || isSameSocketMentor || !room.mentorId) {
+      room.mentorId = socket.id;
 
-        socket.emit("role-assigned", {
-          role,
-          title: block.title,
-          code: room.code,
-          studentsCount: studentsCount(blockId),
-        });
-
-        io.to(blockId).emit("room-count", {
-          studentsCount: studentsCount(blockId),
-        });
-      } catch (e) {
-        socket.emit("error", { message: "Join failed" });
+      if (room.code == null || room.code === "") {
+        room.code = block.initialCode || "";
       }
+      role = "mentor";
+    } else {
+      room.students.add(socket.id);
+      role = "student";
+    }
+
+    socket.join(blockId);
+
+    socket.emit("role-assigned", {
+      role,
+      title: block.title,
+      code: room.code,
+      studentsCount: studentsCount(blockId),
     });
 
-    socket.on("code-change", async ({ blockId, code }) => {
-      const room = getOrCreateRoom(blockId);
-      if (isMentor(blockId, socket.id)) return;
-
-      room.code = code ?? "";
-      socket.to(blockId).emit("code-update", { code: room.code });
-
-      try {
-        const block = await CodeBlock.findById(blockId, { solution: 1 });
-
-        const normalize = (s) =>
-          (s || "")
-            .replace(/\r\n/g, "\n")
-            .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "")
-            .replace(/\s+/g, "")
-            .trim();
-
-        const studentCode = normalize(room.code);
-        const correctSolution = normalize(block?.solution);
-
-        if (block && studentCode === correctSolution) {
-          socket.emit("solved");
-          socket.to(blockId).emit("solved");
-        }
-      } catch (e) {
-        console.error("Error in code-change handler:", e);
-      }
+    io.to(blockId).emit("room-count", {
+      studentsCount: studentsCount(blockId),
     });
+  } catch (e) {
+    socket.emit("error", { message: "Join failed" });
+  }
+}
 
-    socket.on("leave-room", ({ blockId }) => {
-      handleDisconnectFromRoom(io, socket, blockId);
-    });
+async function handleCodeChange(socket, { blockId, code }) {
+  const room = getOrCreateRoom(blockId);
 
-    socket.on("disconnecting", () => {
-      const rooms = [...socket.rooms];
-      rooms.forEach((rid) => {
-        if (rid !== socket.id) {
-          handleDisconnectFromRoom(io, socket, rid);
-        }
-      });
-    });
+  if (isMentor(blockId, socket.id)) return;
+
+  room.code = code ?? "";
+  socket.to(blockId).emit("code-update", { code: room.code });
+
+  // Try to check solution
+  try {
+    const block = await CodeBlock.findById(blockId, { solution: 1 });
+
+    const studentCode = normalizeCode(room.code);
+    const correctSolution = normalizeCode(block?.solution);
+
+    if (block && studentCode === correctSolution) {
+      socket.emit("solved");
+      socket.to(blockId).emit("solved");
+    }
+  } catch (e) {
+    console.error("Error in code-change handler:", e);
+  }
+}
+
+function handleLeaveRoom(io, socket, { blockId }) {
+  handleDisconnectFromRoom(io, socket, blockId);
+}
+
+function handleDisconnecting(io, socket) {
+  // Iterate all rooms this socket belongs to and leave them cleanly
+  const rooms = [...socket.rooms];
+  rooms.forEach((rid) => {
+    if (rid !== socket.id) {
+      handleDisconnectFromRoom(io, socket, rid);
+    }
   });
 }
 
@@ -98,16 +104,28 @@ function handleDisconnectFromRoom(io, socket, blockId) {
   const room = getOrCreateRoom(blockId);
   if (!room) return;
 
-  //if Tom got out of the room-the room closes and the code deletes
+  // if Tom gets out of the room - the room closes and the code is being deleted
   if (room.mentorId === socket.id) {
     io.to(blockId).emit("mentor-left");
     clearRoom(blockId);
     return;
   }
 
-  //if it's a student we update the amount of students
+  // if a student leaves: update student count
   if (room.students.has(socket.id)) {
     room.students.delete(socket.id);
     io.to(blockId).emit("room-count", { studentsCount: room.students.size });
   }
+}
+
+export function registerSocket(io) {
+  io.on("connection", (socket) => {
+    socket.on("join-room", (payload) => handleJoinRoom(io, socket, payload));
+
+    socket.on("code-change", (payload) => handleCodeChange(socket, payload));
+
+    socket.on("leave-room", (payload) => handleLeaveRoom(io, socket, payload));
+
+    socket.on("disconnecting", () => handleDisconnecting(io, socket));
+  });
 }
