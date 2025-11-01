@@ -14,13 +14,13 @@ const seedData = [
   {
     title: "Array sum",
     slug: "array-sum",
-    initialCode: `// sum([1,2,3]) => 6\nfunction sumArray(arr){\n  // your code\n}\n`,
+    initialCode: `// sumArray([1,2,3]) => 6\nfunction sumArray(arr){\n  // your code\n}\n`,
     solution: `function sumArray(arr){\n  return arr.reduce((a,b)=>a+b,0);\n}`,
   },
   {
     title: "Reverse string",
     slug: "reverse-string",
-    initialCode: `// reverse("abc") => "cba"\nfunction reverseString(s){\n  // your code\n}\n`,
+    initialCode: `// reverseString("abc") => "cba"\nfunction reverseString(s){\n  // your code\n}\n`,
     solution: `function reverseString(s){\n  return s.split('').reverse().join('');\n}`,
   },
   {
