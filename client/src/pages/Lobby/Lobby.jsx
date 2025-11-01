@@ -1,12 +1,25 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./Lobby.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import Modal from "../../components/Modal";
 
 export default function Lobby() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showMentorLeft, setShowMentorLeft] = useState(
+    Boolean(location.state?.mentorLeft)
+  );
+
+  useEffect(() => {
+    if (location.state?.mentorLeft) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, []);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -62,6 +75,20 @@ export default function Lobby() {
           </div>
         </section>
       )}
+
+      <Modal
+        open={showMentorLeft}
+        title="Code Session Ended"
+        message={
+          <>
+            The mentor has left the room -
+            <br />
+            you’ve been redirected to the lobby
+          </>
+        }
+        confirmText="OK"
+        onConfirm={() => setShowMentorLeft(false)}
+      />
     </div>
   );
 }

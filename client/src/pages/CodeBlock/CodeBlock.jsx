@@ -51,8 +51,7 @@ function registerSocketHandlers(socket, blockId, navigate, setters) {
   const onRoomCount = ({ studentsCount }) => setStudentsCount(studentsCount);
 
   const onMentorLeft = () => {
-    alert("The mentor has left the session. Returning to lobby...");
-    navigate("/");
+    navigate("/", { state: { mentorLeft: true } });
   };
 
   const onSolved = () => {
