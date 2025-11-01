@@ -33,13 +33,14 @@ function scheduleMentorGrace(io, blockId, oldMentorSocketId, waitMs = 1100) {
   room.mentorGrace.timer = setTimeout(() => {
     const r = getOrCreateRoom(blockId);
     if (r.mentorGrace.pending) {
+      // if still pending, assume that the mentor left the room and didn't only refreshed the page
       io.to(blockId).emit("mentor-left");
       clearRoom(blockId);
     }
   }, waitMs);
 }
 
-// Cancels the pending grace period if the mentor reconnects in time
+// cancels the pending grace period if the mentor reconnects in time
 function cancelMentorGrace(blockId) {
   const room = getOrCreateRoom(blockId);
   if (room.mentorGrace.timer) clearTimeout(room.mentorGrace.timer);
@@ -140,7 +141,7 @@ function handleDisconnectFromRoom(io, socket, blockId) {
     return;
   }
 
-  // if a student leaves: update student count
+  // if a student leaves- update student count
   if (room.students.has(socket.id)) {
     room.students.delete(socket.id);
     io.to(blockId).emit("room-count", { studentsCount: room.students.size });

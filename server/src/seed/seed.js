@@ -4,6 +4,7 @@ import CodeBlock from "../models/CodeBlock.js";
 
 dotenv.config();
 
+// sample code blocks to store in the database
 const seedData = [
   {
     title: "Async case",
@@ -31,9 +32,11 @@ const seedData = [
   },
 ];
 
+// gives the database initial code block data
 (async function seed() {
   await connectDB(process.env.MONGODB_URI);
 
+  // clear existing data and insert fresh data if we want to update
   await CodeBlock.deleteMany({});
   await CodeBlock.insertMany(seedData);
 
