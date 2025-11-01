@@ -140,12 +140,12 @@ export default function CodeBlock() {
         onBack={() => navigate("/")}
       />
 
-      <div className="cb__content">
+      <div className="cb__layout">
         <div className="cb__contentMain">
           <EditorWrapper code={code} onChange={handleChange} role={role} />
         </div>
-        <aside className="cb__side">
-          <HintsPanel hints={hints} role={role} />
+        <aside>
+          <HintsPanel hints={hints} />
         </aside>
       </div>
 

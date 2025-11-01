@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 
-/** Right-side collapsible hints. Each hint reveals on click and stays open until unmount. */
 export default function HintsPanel({ hints = [] }) {
   const safeHints = useMemo(
     () => (Array.isArray(hints) ? hints.slice(0, 2) : []),
