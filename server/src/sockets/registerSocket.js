@@ -83,6 +83,7 @@ async function handleJoinRoom(io, socket, { blockId }) {
       title: block.title,
       code: room.code,
       studentsCount: studentsCount(blockId),
+      hints: Array.isArray(block.hints) ? block.hints : [],
     });
 
     io.to(blockId).emit("room-count", {
