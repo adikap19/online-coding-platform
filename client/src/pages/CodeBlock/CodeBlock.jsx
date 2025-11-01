@@ -7,6 +7,7 @@ import LoadingState from "../../components/LoadingState";
 import ErrorState from "../../components/ErrorState";
 import RoomHeader from "../../components/RoomHeader";
 import EditorWrapper from "../../components/EditorWrapper";
+import HintsPanel from "../../components/HintsPanel";
 
 // Ensure socket instance exists and connected.
 function ensureSocket(socketRef) {
@@ -37,6 +38,7 @@ function registerSocketHandlers(socket, blockId, navigate, setters) {
     setSolved,
     setIsLoading,
     setErrorMsg,
+    setHints,
   } = setters;
 
   const onRoleAssigned = (data) => {
@@ -44,6 +46,7 @@ function registerSocketHandlers(socket, blockId, navigate, setters) {
     setTitle(data.title);
     setCode(data.code);
     setStudentsCount(data.studentsCount);
+    setHints(Array.isArray(data.hints) ? data.hints : []);
     setIsLoading(false);
   };
 
@@ -64,7 +67,6 @@ function registerSocketHandlers(socket, blockId, navigate, setters) {
     setIsLoading(false);
   };
 
-  // attach
   socket.on("role-assigned", onRoleAssigned);
   socket.on("code-update", onCodeUpdate);
   socket.on("room-count", onRoomCount);
@@ -97,6 +99,7 @@ export default function CodeBlock() {
   const [solved, setSolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const [hints, setHints] = useState([]);
 
   useEffect(() => {
     const socket = ensureSocket(socketRef);
@@ -111,6 +114,7 @@ export default function CodeBlock() {
       setSolved,
       setIsLoading,
       setErrorMsg,
+      setHints,
     });
 
     return cleanup;
@@ -136,7 +140,14 @@ export default function CodeBlock() {
         onBack={() => navigate("/")}
       />
 
-      <EditorWrapper code={code} onChange={handleChange} role={role} />
+      <div className="cb__content">
+        <div className="cb__contentMain">
+          <EditorWrapper code={code} onChange={handleChange} role={role} />
+        </div>
+        <aside className="cb__side">
+          <HintsPanel hints={hints} role={role} />
+        </aside>
+      </div>
 
       {solved && (
         <div className="cb__solvedOverlay">

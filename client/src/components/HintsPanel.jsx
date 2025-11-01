@@ -43,7 +43,7 @@ export default function HintsPanel({ hints = [] }) {
           {revealed[i] ? (
             <p className="hint__body">{hint}</p>
           ) : (
-            <p className="hint__placeholder">Hidden. Click “Reveal” to show.</p>
+            <p className="hint__placeholder">Hidden (Click “Reveal” to show)</p>
           )}
         </div>
       ))}
