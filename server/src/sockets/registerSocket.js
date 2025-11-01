@@ -20,7 +20,7 @@ function normalizeCode(s) {
     .trim();
 }
 
-// Starts a short grace period before clearing the room if the mentor refreshes the page
+// Starts a short grace time before clearing the room if the mentor refreshes the page
 // while on a code block page with other students connected
 function scheduleMentorGrace(io, blockId, oldMentorSocketId, waitMs = 1100) {
   const room = getOrCreateRoom(blockId);
@@ -40,7 +40,7 @@ function scheduleMentorGrace(io, blockId, oldMentorSocketId, waitMs = 1100) {
   }, waitMs);
 }
 
-// cancels the pending grace period if the mentor reconnects in time
+// cancels the pending grace time if the mentor reconnects in time
 function cancelMentorGrace(blockId) {
   const room = getOrCreateRoom(blockId);
   if (room.mentorGrace.timer) clearTimeout(room.mentorGrace.timer);
