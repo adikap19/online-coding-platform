@@ -1,4 +1,4 @@
-//Keep syntax highlighting; show only basic syntax errors
+// Keep syntax highlighting. show only basic syntax errors.
 export const handleEditorWillMount = (monaco) => {
   monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
     noSemanticValidation: true,
