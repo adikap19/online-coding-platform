@@ -7,6 +7,11 @@ export function getOrCreateRoom(blockId) {
       students: new Set(),
       code: "",
       blockId,
+      mentorGrace: {
+        pending: false,
+        timer: null,
+        oldMentorSocketId: null,
+      },
     });
   }
   return rooms.get(blockId);

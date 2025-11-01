@@ -20,6 +20,34 @@ function normalizeCode(s) {
     .trim();
 }
 
+// Starts a short grace period before clearing the room if the mentor refreshes the page
+// while on a code block page with other students connected
+function scheduleMentorGrace(io, blockId, oldMentorSocketId, waitMs = 1100) {
+  const room = getOrCreateRoom(blockId);
+
+  if (room.mentorGrace.pending) return;
+
+  room.mentorGrace.pending = true;
+  room.mentorGrace.oldMentorSocketId = oldMentorSocketId;
+
+  room.mentorGrace.timer = setTimeout(() => {
+    const r = getOrCreateRoom(blockId);
+    if (r.mentorGrace.pending) {
+      io.to(blockId).emit("mentor-left");
+      clearRoom(blockId);
+    }
+  }, waitMs);
+}
+
+// Cancels the pending grace period if the mentor reconnects in time
+function cancelMentorGrace(blockId) {
+  const room = getOrCreateRoom(blockId);
+  if (room.mentorGrace.timer) clearTimeout(room.mentorGrace.timer);
+  room.mentorGrace.pending = false;
+  room.mentorGrace.timer = null;
+  room.mentorGrace.oldMentorSocketId = null;
+}
+
 async function handleJoinRoom(io, socket, { blockId }) {
   try {
     const block = await CodeBlock.findById(blockId);
@@ -28,12 +56,14 @@ async function handleJoinRoom(io, socket, { blockId }) {
       socket.emit("error", { message: "Room not found" });
       return;
     }
+
     const room = getOrCreateRoom(blockId);
     const mentorAlive = isMentorAlive(io, room);
     const isSameSocketMentor = room.mentorId === socket.id;
 
     let role;
     if (!mentorAlive || isSameSocketMentor || !room.mentorId) {
+      cancelMentorGrace(blockId);
       room.mentorId = socket.id;
 
       if (room.code == null || room.code === "") {
@@ -106,8 +136,7 @@ function handleDisconnectFromRoom(io, socket, blockId) {
 
   // if Tom gets out of the room - the room closes and the code is being deleted
   if (room.mentorId === socket.id) {
-    io.to(blockId).emit("mentor-left");
-    clearRoom(blockId);
+    scheduleMentorGrace(io, blockId, socket.id, 1100);
     return;
   }
 
