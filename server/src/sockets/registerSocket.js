@@ -15,9 +15,14 @@ export function registerSocket(io) {
 
         const room = getOrCreateRoom(blockId);
 
+        const mentorAlive = !!(
+          room.mentorId && io.sockets.sockets.get(room.mentorId)
+        );
+        const isSameSocketMentor = room.mentorId === socket.id;
+
         // If there is no mentor, the first one enters the room is the mentor
         let role;
-        if (!room.mentorId) {
+        if (!mentorAlive || isSameSocketMentor || !room.mentorId) {
           room.mentorId = socket.id;
           if (room.code == null || room.code === "") {
             room.code = block.initialCode || "";
