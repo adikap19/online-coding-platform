@@ -1,6 +1,6 @@
 import CodeBlock from "../models/CodeBlock.js";
 
-/* list of blocks for the lobby*/
+// list of blocks for the lobby
 export async function listBlocks(req, res, next) {
   try {
     const blocks = await CodeBlock.find({}, { title: 1 }).sort({ title: 1 });
@@ -10,7 +10,7 @@ export async function listBlocks(req, res, next) {
   }
 }
 
-/* details of one block */
+// details of one block 
 export async function getBlock(req, res, next) {
   try {
     const { id } = req.params;
