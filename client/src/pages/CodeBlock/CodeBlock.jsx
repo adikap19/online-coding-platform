@@ -141,7 +141,7 @@ export default function CodeBlock() {
       {solved && (
         <div className="cb__solvedOverlay">
           <span role="img" aria-label="smile">
-            😄
+            😎
           </span>
         </div>
       )}
