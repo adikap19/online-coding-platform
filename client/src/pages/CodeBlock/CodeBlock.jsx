@@ -52,7 +52,6 @@ function registerSocketHandlers(socket, blockId, navigate, setters) {
 
   const onCodeUpdate = ({ code }) => setCode(code);
   const onRoomCount = ({ studentsCount }) => setStudentsCount(studentsCount);
-
   const onMentorLeft = () => {
     navigate("/", { state: { mentorLeft: true } });
   };
