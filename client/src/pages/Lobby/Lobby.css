@@ -93,6 +93,7 @@
   padding: 6px 8px;
   border-radius: 999px;
   letter-spacing: 0.6px;
+  user-select: none;
 }
 
 .card__title {
