@@ -5,7 +5,7 @@ It allows mentors to create code exercises, view students’ progress in real-ti
 
 
 Live URL:
-👉 https://online-coding-platform-topaz.vercel.app
+👉 https://online-coding-platform-adik.vercel.app
 ---
 
 ## 🌟 Overview
