@@ -88,7 +88,7 @@ Each exercise (called a *Code Block*) includes:
         * package.json
 
 
-
+---
 
 🌐 **Deployment**  
 🔹 **Client (Vercel)**  
