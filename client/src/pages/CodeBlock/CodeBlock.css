@@ -82,12 +82,14 @@
   font-size: 18px;
   margin-bottom: 4px;
   color: var(--accent);
+  user-select: none;
 }
 
 .cb__count {
   color: var(--muted);
   font-size: 16px;
   margin-bottom: 12px;
+  user-select: none;
 }
 
 .cb__back {
@@ -187,6 +189,7 @@
   margin-left: 6px;
   opacity: 0.8;
   font-weight: 600;
+  user-select: none;
 }
 
 .cb__layout {
@@ -222,6 +225,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  user-select: none;
 }
 
 .hints__empty {
@@ -246,6 +250,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  user-select: none;
 }
 
 .hint__badge {
@@ -278,6 +283,7 @@
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 14px;
+  user-select: none;
 }
 
 .hint__body {

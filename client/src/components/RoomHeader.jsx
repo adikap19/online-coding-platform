@@ -1,3 +1,5 @@
+import { FaUsers } from "react-icons/fa";
+
 export default function RoomHeader({ title, role, studentsCount, onBack }) {
   return (
     <div className="cb__header">
@@ -16,7 +18,12 @@ export default function RoomHeader({ title, role, studentsCount, onBack }) {
         </p>
       )}
       <p className="cb__count">
-        👥 {studentsCount} student{studentsCount !== 1 && "s"} in room
+        <FaUsers
+          size={18}
+          color="#a495cfff"
+          style={{ marginRight: "6px", verticalAlign: "middle" }}
+        />
+        {studentsCount} student{studentsCount !== 1 && "s"} in room
       </p>
       <button className="cb__back" onClick={onBack}>
         ← Back to Lobby

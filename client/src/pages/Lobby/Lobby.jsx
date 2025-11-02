@@ -55,7 +55,6 @@ export default function Lobby() {
         <p className="hero__subtitle">{subtitle}</p>
       </div>
 
-      {/* Only render the grid if data loaded successfully */}
       {!loading && !error && (
         <section className="section">
           <h2 className="section__title">Choose Code Block</h2>

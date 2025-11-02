@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 
 export default function HintsPanel({ hints = [] }) {
   const safeHints = useMemo(
-    () => (Array.isArray(hints) ? hints.slice(0, 2) : []),
+    () => (Array.isArray(hints) ? hints.slice(0, hints.length) : []),
     [hints]
   );
   const [revealed, setRevealed] = useState(safeHints.map(() => false));

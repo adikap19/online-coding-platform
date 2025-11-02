@@ -48,7 +48,6 @@ const seedData = [
   },
 ];
 
-// gives the database initial code block data
 (async function seed() {
   await connectDB(process.env.MONGODB_URI);
 
